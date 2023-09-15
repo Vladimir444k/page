@@ -1,17 +1,17 @@
-image: Ubuntu1804
+image: Ubuntu  # образ для сборки
+
+stack: jdk 11  # версия JDK
 
 branches:
   only:
-    - master
+    - main  # ветка git
 
-build: off
+build: off  # будем использовать свой скрипт сборки
 
 install:
-  - ps: $App = Start-Process -FilePath java -ArgumentList "-jar ./artifacts/app-ibank-build-for-testers.jar" -PassThru
+  # запускаем SUT (& означает, что в фоновом режиме не блокируем терминал для запуска тестов)
+  - java -jar ./artifacts/app-ibank-build-for-testers.jar -P:profile=test &
+  - chmod +x gradlew
 
 build_script:
-  - ps: chmod +x ./gradlew
-  - ps: ./gradlew test --info "-Dselenide.headless=true"
-
-on_finish:
-  - ps: Stop-Process -Id $App.Id
+  - ./gradlew test --info -Dselenide.headless=true  # запускаем тест, флаг --info позволяет выводить больше информации

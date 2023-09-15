@@ -1,33 +1,34 @@
 package ru.netology.web.page;
 
+import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.SelenideElement;
-import lombok.SneakyThrows;
-import org.openqa.selenium.Keys;
+import ru.netology.web.data.DataHelper;
 
-import static com.codeborne.selenide.Condition.visible;
+import java.time.Duration;
+
 import static com.codeborne.selenide.Selenide.$;
-import static java.lang.Thread.sleep;
 
 public class TransferPage {
-    private SelenideElement sumField = $("div[data-test-id=amount] input");
-    private SelenideElement accountField = $("span[data-test-id=from] input");
-    private SelenideElement topUpButton = $("button[data-test-id=action-transfer]");
-    private SelenideElement errorNotification = $("[data-test-id = error-notification]");
-
-    @SneakyThrows
-    public DashboardPage successfulTopUp(String sum, String cardNum) {
-        sumField.sendKeys(Keys.chord(Keys.CONTROL, "a", Keys.DELETE));
-        sumField.setValue(sum);
-        accountField.sendKeys(Keys.chord(Keys.CONTROL, "a", Keys.DELETE));
-        accountField.setValue(cardNum);
-        sleep(5000);
-        topUpButton.click();
+    private final SelenideElement amount = $("[data-test-id=amount] input");
+    private final SelenideElement from = $("[data-test-id=from] input");
+    private final SelenideElement buttonTransfer = $("[data-test-id=action-transfer]");
+    private final SelenideElement errorMassage = $("[data-test-if='error-message']");
+    //public TransferPage() {
+      //  transferHead.shouldBe(visible);
+    //}
+    public DashboardPage transfer(String amountToTransfer, DataHelper.CardInfo cardInfo) {
+        makeValidTransfer(amountToTransfer, cardInfo);
         return new DashboardPage();
     }
 
-    public void unsuccessfulTopUp(String sum, String cardNum) {
-        sumField.sendKeys(Keys.chord(Keys.CONTROL, "a", Keys.DELETE));
-        sumField.setValue(sum);
-        errorNotification.shouldBe(visible);
+    public void makeValidTransfer(String amountToTransfer, DataHelper.CardInfo cardInfo) {
+        amount.setValue(amountToTransfer);
+        from.setValue(cardInfo.getCardNumber());
+        buttonTransfer.click();
+    }
+
+    public void getErrorMassage(String expectedText) {
+        errorMassage.should(Condition.exactText(expectedText), Duration.ofSeconds(15))
+                .should(Condition.visible);
     }
 }
